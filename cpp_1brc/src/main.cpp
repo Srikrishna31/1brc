@@ -9,6 +9,7 @@
 #include <limits>
 #include <chrono>
 
+
 using namespace std::string_literals;
 
 struct Stats {
@@ -60,7 +61,7 @@ auto timeFuncInvocation = [](auto&& func, auto&&... params) -> double {
 int main(int , char** )
 {
     try {
-        auto time = timeFuncInvocation(processFile, "D:/cpp_1brc/data/measurements-1000000000.txt"s);
+        auto time = timeFuncInvocation(processFile, "D:/Github_Projects/1brc/data/measurements-1000000000.txt"s);
         std::cout << std::endl << "Time taken to process: " << time / 1000 << " seconds" << std::endl;
 
     } catch(std::exception& e) {
