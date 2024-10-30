@@ -10,6 +10,7 @@
 #include <optional>
 
 class FileMmapWin {
+public:
     explicit FileMmapWin(std::string f);
     ~FileMmapWin();
 
@@ -18,8 +19,11 @@ class FileMmapWin {
     class LineIterator {
         FileMmapWin& f;
         uint64_t pos;
+        uint32_t lineLength{};
+        LineIterator(FileMmapWin& f, uint64_t  pos = 0, uint32_t lineLength = 0);
+
+        friend class FileMmapWin; // probably the only time when a friend is useful.
     public:
-        LineIterator(FileMmapWin& f, uint64_t  pos = 0);
         std::string_view operator*();
         LineIterator& operator++();
         LineIterator& operator++(int);

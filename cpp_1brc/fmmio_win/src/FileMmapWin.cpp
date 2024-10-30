@@ -97,14 +97,26 @@ FileMmapWin::LineIterator FileMmapWin::begin() {
 }
 
 FileMmapWin::LineIterator FileMmapWin::end() {
-    return {*this, data->fileSize};
+    return {*this, data->fileSize, static_cast<decltype(LineIterator::lineLength)>(data->fileSize)};
 }
 
 std::string_view FileMmapWin::LineIterator::operator*() {
+    if (pos < f.data->fileSize) {
+        auto data = static_cast<char*>(f.data->lpBase);
+        return {data + pos, lineLength - 2}; // exclude the \r\n which is 2 characters.
+    }
+
     return {};
 }
 
 FileMmapWin::LineIterator &FileMmapWin::LineIterator::operator++() {
+    if (pos < f.data->fileSize - 1) {
+        auto data = static_cast<char*>(f.data->lpBase);
+        auto i = 0;
+        for (;i < f.data->fileSize - 1 && data[pos + lineLength + i] != '\n'; ++i);
+        pos += lineLength;
+        lineLength = i + 1; // point to the next row.
+    }
     return *this;
 }
 
@@ -113,15 +125,18 @@ FileMmapWin::LineIterator &FileMmapWin::LineIterator::operator++(int) {
 }
 
 bool FileMmapWin::LineIterator::operator==(const FileMmapWin::LineIterator &other) const {
-    return false;
+    return &f == &other.f && pos == other.pos && lineLength == other.lineLength;
 }
 
 bool FileMmapWin::LineIterator::operator!=(const FileMmapWin::LineIterator &other) const {
-    return false;
+    return !(*this == other);
 }
 
-FileMmapWin::LineIterator::LineIterator(FileMmapWin &f, uint64_t pos)
+FileMmapWin::LineIterator::LineIterator(FileMmapWin &f, uint64_t pos, uint32_t lineLength)
 : f{f}
 , pos{pos}
+, lineLength{lineLength}
 {
+    //Make sure the first line is already read, when the iterator is created.
+    operator++();
 }

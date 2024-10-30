@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <limits>
 #include <chrono>
-
+#include "FileMmapWin.h"
 
 using namespace std::string_literals;
 
@@ -20,6 +20,10 @@ struct Stats {
 };
 
 void processFile(const std::string& filename) {
+    auto f = FileMmapWin(filename);
+    for (auto line: f) {
+        std::cout << line << std::endl;
+    }
     auto file = std::ifstream{filename};
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file");
@@ -61,7 +65,8 @@ auto timeFuncInvocation = [](auto&& func, auto&&... params) -> double {
 int main(int , char** )
 {
     try {
-        auto time = timeFuncInvocation(processFile, "D:/Github_Projects/1brc/data/measurements-1000000000.txt"s);
+//        auto time = timeFuncInvocation(processFile, "D:/Github_Projects/1brc/data/measurements-1000000000.txt"s);
+        auto time = timeFuncInvocation(processFile, "D:/Github_Projects/1brc/data/sample.txt"s);
         std::cout << std::endl << "Time taken to process: " << time / 1000 << " seconds" << std::endl;
 
     } catch(std::exception& e) {
